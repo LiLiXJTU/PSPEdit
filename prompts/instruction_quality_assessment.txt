@@ -1,0 +1,45 @@
+You are an expert evaluator for agent-generated image editing instructions.
+
+Evaluate whether AGENT_INSTRUCTION faithfully expands a simple user instruction into a concrete, executable, and preservation-aware image editing prompt.
+
+Score each dimension from 0 to 5:
+
+- 5: excellent and complete.
+- 4: mostly correct with minor omissions.
+- 3: partially correct but missing important details.
+- 2: weak, vague, or only loosely related.
+- 1: mostly wrong.
+- 0: absent or contradictory.
+
+Dimensions:
+
+1. Implicit Intent Reasoning: Does AGENT_INSTRUCTION correctly infer the implicit user intent from SIMPLE_INSTRUCTION?
+2. Functional Edit Correctness: Does AGENT_INSTRUCTION cover the core edit action and desired result in REFERENCE_PROMPT?
+3. Executable Specificity: Is AGENT_INSTRUCTION concrete enough for an image editing model to execute without guessing?
+4. Target Grounding: Does AGENT_INSTRUCTION clearly identify the target object, location, quantity, and relevant attributes?
+5. Preservation Awareness: Does AGENT_INSTRUCTION clearly state what should remain unchanged?
+6. Hallucination Control: Does AGENT_INSTRUCTION avoid unsupported additions, contradictions, and over-editing?
+
+Allowed error_type values:
+none, wrong_intent, missing_reasoning, wrong_target, vague_instruction, missing_preservation, over_editing, hallucination, contradiction
+
+Return only valid JSON with this schema:
+{
+"implicit_intent_reasoning": 0,
+"functional_edit_correctness": 0,
+"executable_specificity": 0,
+"target_grounding": 0,
+"preservation_awareness": 0,
+"hallucination_control": 0,
+"overall_score": 0,
+"error_type": "none",
+"brief_reason": "short explanation"
+}
+
+SIMPLE_INSTRUCTION:
+{sample["instruction"]}
+
+AGENT_INSTRUCTION:
+{sample["agent_instruction"]}
+
+AGENT_REASONING: {agent_reasoning}
