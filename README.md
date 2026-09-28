@@ -1,32 +1,63 @@
-# PSPEdit: Instruction Quality Assessment Prompt
+# PSPEdit: Quality Assessment Agent
 
-This repository contains the author-provided prompt for assessing agent-generated image editing instructions in the PSPEdit project.
+Four-dimensional evaluation of **edited images**, using a shared editing specification derived from the original image and user instruction.
 
-## Prompt
+This release replaces the earlier six-dimensional instruction-text prompt, which evaluated a different object.
 
-See [instruction_quality_assessment.txt](prompts/instruction_quality_assessment.txt).
+## Code and Prompts
 
-The prompt evaluates instruction text along six dimensions, each scored from 0 to 5:
+- [aies_metric.py](aies_metric.py): prompt builders, edit-spec validation, and JSON extraction helper.
+- [Shared target extraction](prompts/edit_spec.txt).
+- [Four-dimensional image assessment](prompts/image_judge.txt).
+- [Optional pairwise tie-breaker](prompts/tie_breaker.txt).
+- [Tests](tests/test_aies_metric.py): prompt and edit-spec contracts.
 
-1. Implicit intent reasoning
-2. Functional edit correctness
-3. Executable specificity
-4. Target grounding
-5. Preservation awareness
-6. Hallucination control
+The prompt functions are extracted from the author's existing `zhibiao/aies_metric.py` implementation, with their wording preserved. This release includes prompt construction and JSON parsing, not a complete inference pipeline or overall-score implementation.
 
-It requests a JSON response containing these six scores, an overall score, an error type, and a brief explanation. The template is preserved as supplied by the author, with chat-specific escaping removed.
+## Evaluation Flow
 
-## Inputs and Scope
+1. Call `build_edit_spec_prompt(instruction)` and pass the text **with the original image** to a multimodal evaluator. Parse its JSON into `edit_spec`, containing `target`, `location`, `replacement`, `keep`, and `ambiguity`.
+2. Reuse that specification for every candidate for the sample. Call `build_image_judge_prompt(edit_spec, candidate_label)` and pass the text **with the original image first and the candidate image second** to the evaluator.
+3. Parse its JSON response to obtain the four dimension scores and their visual-evidence explanations.
 
-The supplied template includes `SIMPLE_INSTRUCTION`, `AGENT_INSTRUCTION`, and `AGENT_REASONING` placeholders. It assesses generated editing instructions, not whether an edited image actually fulfills the instruction. It should therefore be distinguished from an image-output evaluator reporting editing correctness, target localization, preservation, and visual quality on a 0-100 scale.
+These image inputs follow the original `QwenImageJudge.extract_edit_spec` and `evaluate_candidate` call sites. The stages do not consume the editing agent's instruction or reasoning fields; scoring uses visible image evidence.
 
-## Details to Specify Before Reproduction
+The original prompt includes the supplied candidate label, so this interface is not inherently blinded. The optional tie-breaker explicitly refers to baseline and agent images and provides a separate pairwise comparison.
 
-- The functional-correctness rubric references `REFERENCE_PROMPT`, but the supplied template has no corresponding input block. The reference source and how it is supplied need to be specified.
-- The aggregation rule and scale for `overall_score` are not defined in the supplied prompt.
-- `AGENT_REASONING` is included as input, but its permitted role in judging the final instruction is not specified.
-- No image input is specified in this text template. Image-conditioned evaluation requires documenting any image attached separately by the evaluation code.
-- The evaluator model, decoding settings, and sampling procedure must be documented separately to reproduce a particular evaluation.
+## Four Dimensions
 
-This prompt release does not include generation code, evaluation results, model weights, or datasets. It does not establish agreement with human judgments.
+| Dimension | Field | Range |
+|---|---|---|
+| Editing correctness (RC) | `replacement_correctness` | 0-100 |
+| Target localization (TL) | `target_localization` | 0-100 |
+| Non-target preservation (P) | `preservation` | 0-100 |
+| Visual quality (VQ) | `visual_quality` | 0-100 |
+
+## Usage
+
+The prompt module uses only the Python standard library. Supply a multimodal inference backend separately.
+
+```python
+from aies_metric import (
+    build_edit_spec_prompt, build_image_judge_prompt,
+    extract_json_object,
+)
+
+# Send with the original image to your multimodal evaluator.
+spec_prompt = build_edit_spec_prompt("Change the left animal to a chicken.")
+
+# After receiving the evaluator's response:
+# edit_spec = extract_json_object(spec_response)
+# judge_prompt = build_image_judge_prompt(edit_spec, "candidate")
+# Send judge_prompt with [original_image, candidate_image].
+# assessment = extract_json_object(judge_response)
+# dimension_scores = assessment["scores"]
+```
+
+No measured result is implied by this example. Record the model identifier, decoding settings, image preprocessing and dataset selection separately for reproducibility.
+
+Run the core tests from the repository root:
+
+```sh
+python -m unittest discover -s tests -v
+```

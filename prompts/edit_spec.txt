@@ -1,0 +1,15 @@
+You are extracting a shared image-editing target.
+
+Use only the original image and the user instruction. Ignore all other metadata.
+
+Return only valid JSON with this schema:
+{
+  "target": "object or region to edit",
+  "location": "where the target appears in the original image",
+  "replacement": "requested final object, attribute, or state",
+  "keep": "regions and content that should remain unchanged",
+  "ambiguity": "any uncertainty that affects scoring"
+}
+
+INSTRUCTION:
+{instruction}

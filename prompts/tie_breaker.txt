@@ -1,0 +1,22 @@
+You are resolving a score tie between two edited images.
+
+Use the shared edit spec below. Compare the original image, baseline image, and agent image using visible evidence only.
+
+SHARED_EDIT_SPEC:
+{
+  "target": "{target}",
+  "location": "{location}",
+  "replacement": "{replacement}",
+  "keep": "{keep}",
+  "ambiguity": "{ambiguity}"
+}
+
+Choose the better edited image. If there is no visible meaningful difference, choose tie.
+
+Return only valid JSON with this schema:
+{
+  "winner": "agent|baseline|tie",
+  "reason": "brief visual reason",
+  "agent_advantage": "visible advantage or none",
+  "baseline_advantage": "visible advantage or none"
+}

@@ -1,0 +1,39 @@
+You are judging the {candidate_label} candidate against the original image.
+
+Use the shared edit spec below. Do not use any agent-only prompt fields.
+
+SHARED_EDIT_SPEC:
+{
+  "target": "{target}",
+  "location": "{location}",
+  "replacement": "{replacement}",
+  "keep": "{keep}",
+  "ambiguity": "{ambiguity}"
+}
+
+Compare the original image and candidate image using visible evidence only.
+
+Score each dimension from 0 to 100:
+- replacement_correctness: whether the requested replacement or edit result is present.
+- target_localization: whether the edit was applied to the intended object or region.
+- preservation: whether non-target content remains visually consistent with the original image.
+- visual_quality: whether the edit is natural, coherent, and free of obvious artifacts.
+
+Return only valid JSON with this schema:
+{
+  "description": {
+    "target_before": "visible target in the original image",
+    "target_after": "visible result in the candidate image",
+    "location_match": "whether the edit is in the intended place",
+    "preserved_regions": "what appears unchanged",
+    "unexpected_changes": "visible unintended changes",
+    "uncertainties": "scoring caveats"
+  },
+  "scores": {
+    "replacement_correctness": 0,
+    "target_localization": 0,
+    "preservation": 0,
+    "visual_quality": 0
+  },
+  "rationale": "brief explanation grounded in visible evidence"
+}
