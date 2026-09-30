@@ -4,6 +4,20 @@ Four-dimensional evaluation of **edited images**, using a shared editing specifi
 
 This release replaces the earlier six-dimensional instruction-text prompt, which evaluated a different object.
 
+## Paper Figures
+
+Click a figure to open the original PDF.
+
+[![PSPEdit paper figure 1](fig/111.png)](fig/111.pdf)
+
+[![PSPEdit paper figure 2](fig/222.png)](fig/222.pdf)
+
+[![PSPEdit paper figure 3](fig/333.png)](fig/333.pdf)
+
+[![PSPEdit paper figure 4](fig/444.png)](fig/444.pdf)
+
+[![PSPEdit paper figure 5](fig/555.png)](fig/555.pdf)
+
 ## Code and Prompts
 
 - [aies_metric.py](aies_metric.py): prompt builders, edit-spec validation, and JSON extraction helper.
